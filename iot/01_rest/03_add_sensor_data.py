@@ -5,6 +5,9 @@ import numpy as np
 import time
 import json
 import configparser 
+import Adafruit_DHT
+
+
 
 config = configparser.ConfigParser()
 config.read('../../cht.conf')
@@ -18,11 +21,16 @@ headers = {
     "Content-Type": "application/json",
 }   
 
-v = str(int(np.random.random() *100))
-t = str(time.strftime("%Y-%m-%dT%H:%M:%S"))
-payload=[{"id":sensorId, "value":[v]}]
-print(payload)
-
-response = requests.post(apiURL, headers=headers, data=json.dumps(payload))
-print(response.text)
+#get real data
+while 1:
+    humidity,temperature=Adafruit_DHT.read_retry(11,18)
+    if humidity is not None and temperature is not None:
+        #t = str(time.strftime("%Y-%m-%dT%H:%M:%S"))
+        payload=[{"id":"Temperature","value":[temperature]},{"id":"humidity","value":[humidity]}]
+        print(payload)
+        response = requests.post(apiURL, headers=headers, data=json.dumps(payload))
+        print(response.text)
+        time.sleep(5)
+    else:
+        print("failed")
 
